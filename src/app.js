@@ -1,30 +1,22 @@
 const express = require('express');
-const { google } = require('googleapis'); // Asegúrate de importar "googleapis" correctamente
+const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 5000; 
 
-// Configura la API de YouTube
-const youtube = google.youtube({
-  version: 'v3',
-  auth: 'AIzaSyCFksZYEs6nbvuaLV3ysCo1iRGOwpcpTls' // Reemplaza con tu clave de API
-});
+// Middleware para servir archivos estáticos (HTML, CSS, JS)
+app.use(express.static(path.join(__dirname, 'public')))
 
-// Ruta para realizar búsquedas en YouTube
-app.get('/search', async (req, res) => {
-  try {
-    const resultado = await youtube.search.list({
-      part: 'snippet',
-      q: req.query.q, // La consulta de búsqueda
-      maxResults: 10 // Número máximo de resultados
-    });
+// las rutas  YouTube
+const youtubeRoutes = require('./routes/youtube');
 
-    res.json(resultado.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error en la búsqueda de videos.' });
-  }
-});
+// Middleware 
+app.use(express.json());
 
-app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en el puerto ${PORT}`);
+//rutas importadas
+app.use('/youtube', youtubeRoutes);
+
+// Manejo y configuraciones de otras rutas del servidor
+
+app.listen(port, () => {
+  console.log(`Servidor escuchando en el puerto ${port}`);
 });

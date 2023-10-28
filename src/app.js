@@ -1,30 +1,29 @@
 const express = require('express');
-const { google } = require('googleapis'); // Asegúrate de importar "googleapis" correctamente
+const axios = require('axios')
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = 5000;
 
-// Configura la API de YouTube
-const youtube = google.youtube({
-  version: 'v3',
-  auth: 'AIzaSyCFksZYEs6nbvuaLV3ysCo1iRGOwpcpTls' // Reemplaza con tu clave de API
-});
+//ruta para buscar video
 
-// Ruta para realizar búsquedas en YouTube
-app.get('/search', async (req, res) => {
-  try {
-    const resultado = await youtube.search.list({
-      part: 'snippet',
-      q: req.query.q, // La consulta de búsqueda
-      maxResults: 10 // Número máximo de resultados
-    });
+app.get('/video/:videoId', (req, res) => {
+  const videoId = req.params.videoId;
+  const apikey = 'AIzaSyCFksZYEs6nbvuaLV3ysCo1iRGOwpcpTls';
 
-    res.json(resultado.data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error en la búsqueda de videos.' });
-  }
-});
+  const apiUrl = 'https://www.googleapis.com/youtube/v3/search?key=${apikey}&q=${consulta}&part=snippet'
 
-app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en el puerto ${PORT}`);
+  axios.get(apiUrl)
+    .then(response => {
+      const videoData = response.data.items[0];
+      const title = videoData.snippet.title;
+      const description = videoData.snippet.description;
+
+      res.json({ title, description });
+
+    })
+
+})
+
+app.listen(port,() =>{
+  console.log('servidor escuchando el puerto ${port}')
 });
